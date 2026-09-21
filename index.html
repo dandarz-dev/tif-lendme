@@ -38,6 +38,110 @@
         ::-webkit-scrollbar-track { background: #090d16; }
         ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #374151; }
+
+        /* Floating Calculator Styles */
+        #floating-calc-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            font-family: 'Inter', sans-serif;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        #floating-calc-container.calc-minimized .calc-body {
+            display: none;
+        }
+
+        #floating-calc-container.calc-minimized #calc-toggle-btn::before {
+            content: "▲";
+        }
+
+        #floating-calc-container:not(.calc-minimized) #calc-toggle-btn::before {
+            content: "▼";
+        }
+
+        #calc-toggle-btn {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            background: #1e293b;
+            color: #fff;
+            border: 1px solid #334155;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            font-size: 16px;
+            box-shadow: 0 -2px 6px rgba(0,0,0,0.15);
+        }
+
+        .calc-body {
+            background: #1e293b;
+            padding: 15px;
+            border-radius: 12px 0 12px 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            width: 240px;
+            border: 1px solid #334155;
+        }
+
+        .calc-header {
+            color: #94a3b8;
+            font-size: 11px;
+            margin-bottom: 8px;
+            text-align: center;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
+        #calc-display {
+            width: 100%;
+            height: 40px;
+            background: #0f172a;
+            color: #38bdf8;
+            text-align: right;
+            padding: 5px 10px;
+            font-size: 18px;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+
+        .calc-keys {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+        }
+
+        .calc-keys button {
+            padding: 10px;
+            background: #334155;
+            color: #f8fafc;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .calc-keys button:hover {
+            background: #475569;
+        }
+
+        .calc-keys button.calc-equal {
+            grid-row: span 2;
+            height: 100%;
+            background: #0284c7;
+        }
+
+        .calc-keys button.calc-equal:hover {
+            background: #0369a1;
+        }
+
+        .calc-keys button.calc-zero {
+            grid-column: span 2;
+        }
     </style>
 </head>
 <body class="bg-darkBg text-slate-100 min-h-screen flex flex-col selection:bg-primary-500 selection:text-white">
@@ -121,9 +225,9 @@
                     <div class="mb-6">
                         <label class="text-sm font-medium text-slate-300 block mb-2">Interest Rate Type</label>
                         <select id="rate-type" class="w-full bg-slate-900 border border-borderDark rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-primary-500 transition-all text-sm font-semibold text-primary-400">
-                            <option value="flat">Flat Rate (Constant interest based on initial principal)</option>
-                            <option value="diminishing">Diminishing Rate / Reducing Balance (Interest based on remaining balance)</option>
-                            <option value="compound">Compound Rate (Compounding interest calculation)</option>
+                            <option value="flat">Flat Rate</option>
+                            <option value="diminishing">Diminishing Rate</option>
+                            <option value="compound">Compound Rate</option>
                         </select>
                     </div>
 
@@ -132,11 +236,11 @@
                             <label class="text-sm font-medium text-slate-300">Loan Amount (Principal)</label>
                             <span id="amount-val" class="text-lg font-bold text-primary-400">₱50,000</span>
                         </div>
-                        <input type="range" id="loan-amount" min="5000" max="300000" step="5000" value="50000" 
+                        <input type="range" id="loan-amount" min="500" max="500000" step="500" value="50000" 
                             class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-primary-500">
                         <div class="flex justify-between text-xs text-slate-500 mt-1">
-                            <span>₱5,000</span>
-                            <span>₱300,000</span>
+                            <span>₱500</span>
+                            <span>₱500,000</span>
                         </div>
                     </div>
 
@@ -690,18 +794,51 @@
         </div>
     </main>
 
+    <!-- Floating Calculator Widget Component -->
+    <div id="floating-calc-container" class="calc-minimized">
+        <button id="calc-toggle-btn" aria-label="Toggle Calculator">▲</button>
+        <div class="calc-body">
+            <div class="calc-header">
+                <span>TIFL Calculator</span>
+            </div>
+            <input type="text" id="calc-display" readonly value="0">
+            <div class="calc-keys">
+                <button onclick="calcClear()">C</button>
+                <button onclick="calcAppend('/')">/</button>
+                <button onclick="calcAppend('*')">*</button>
+                <button onclick="calcBack()">⌫</button>
+                
+                <button onclick="calcAppend('7')">7</button>
+                <button onclick="calcAppend('8')">8</button>
+                <button onclick="calcAppend('9')">9</button>
+                <button onclick="calcAppend('-')">-</button>
+                
+                <button onclick="calcAppend('4')">4</button>
+                <button onclick="calcAppend('5')">5</button>
+                <button onclick="calcAppend('6')">6</button>
+                <button onclick="calcAppend('+')">+</button>
+                
+                <button onclick="calcAppend('1')">1</button>
+                <button onclick="calcAppend('2')">2</button>
+                <button onclick="calcAppend('3')">3</button>
+                <button onclick="calcCompute()" class="calc-equal">=</button>
+                
+                <button onclick="calcAppend('0')" class="calc-zero">0</button>
+                <button onclick="calcAppend('.')">.</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer class="border-t border-borderDark bg-[#070b14] py-6 text-center text-xs text-slate-500">
-        <div class="max-w-7xl mx-auto px-4">&copy; 2026 Tyler's Farm Lending Coop. All rights reserved.</div>
+        <div class="max-w-7xl mx-auto px-4">&copy; 2026 Tyler's Farm Lending Coop. All rights reserved. App developed by: dandarz&copy;2026</div>
     </footer>
 
     <!-- Firebase SDK Imports via ES Modules Integration Script -->
     <script type="module">
-        // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
 
-        // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAOtzVtKTwW13HdtZ0SoloTCG1YiRiBK3k",
             authDomain: "tif-lending-app.firebaseapp.com",
@@ -712,11 +849,9 @@
             measurementId: "G-84NWF9LPDX"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
         
-        // Expose analytics/app globally if needed for other modules
         window.firebaseApp = app;
         window.firebaseAnalytics = analytics;
     </script>
@@ -1413,6 +1548,40 @@
             } else { document.getElementById('adminAuthError').classList.remove('hidden'); }
         }
         function lockAdminSession() { switchTab('calculator'); }
+
+        // Floating Calculator Script Logic
+        const calcContainer = document.getElementById('floating-calc-container');
+        const toggleBtn = document.getElementById('calc-toggle-btn');
+        const display = document.getElementById('calc-display');
+
+        toggleBtn.addEventListener('click', () => {
+            calcContainer.classList.toggle('calc-minimized');
+        });
+
+        function calcAppend(val) {
+            if (display.value === '0' && val !== '.') {
+                display.value = val;
+            } else {
+                display.value += val;
+            }
+        }
+
+        function calcClear() {
+            display.value = '0';
+        }
+
+        function calcBack() {
+            display.value = display.value.slice(0, -1) || '0';
+        }
+
+        function calcCompute() {
+            try {
+                display.value = eval(display.value.replace(/[^0-9/*+\-.]/g, ''));
+            } catch (error) {
+                display.value = 'Error';
+                setTimeout(() => calcClear(), 1500);
+            }
+        }
 
         window.onload = function() {
             const todayStr = new Date().toISOString().split('T')[0];
