@@ -226,13 +226,13 @@
                     <div class="mb-5">
                         <div class="flex justify-between items-center mb-1.5">
                             <label class="text-xs sm:text-sm font-medium text-slate-300">Loan Amount (Principal)</label>
-                            <span id="amount-val" class="text-base sm:text-lg font-bold text-primary-400">₱50,000</span>
+                            <span id="amount-val" class="text-base sm:text-lg font-bold text-primary-400">₱500</span>
                         </div>
-                        <input type="range" id="loan-amount" min="500" max="500000" step="500" value="50000" 
+                        <input type="range" id="loan-amount" min="500" max="100000" step="500" value="500" 
                             class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-primary-500">
                         <div class="flex justify-between text-[11px] text-slate-500 mt-1">
                             <span>₱500</span>
-                            <span>₱500,000</span>
+                            <span>₱100,000</span>
                         </div>
                     </div>
 
@@ -252,9 +252,9 @@
                     <div class="mb-5">
                         <div class="flex justify-between items-center mb-1.5">
                             <label class="text-xs sm:text-sm font-medium text-slate-300">Interest Rate (%)</label>
-                            <span id="rate-val" class="text-base sm:text-lg font-bold text-primary-400">3.0% / mo</span>
+                            <span id="rate-val" class="text-base sm:text-lg font-bold text-primary-400">5.0% / mo</span>
                         </div>
-                        <input type="range" id="loan-rate" min="0.5" max="12.0" step="0.5" value="3.0" 
+                        <input type="range" id="loan-rate" min="0.5" max="12.0" step="0.5" value="5.0" 
                             class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-primary-500">
                         <div class="flex justify-between text-[11px] text-slate-500 mt-1">
                             <span>0.5%</span>
@@ -265,11 +265,11 @@
                     <div class="mb-5">
                         <label class="text-xs sm:text-sm font-medium text-slate-300 block mb-1.5">Payment Frequency</label>
                         <select id="payment-frequency" class="w-full bg-slate-900 border border-borderDark rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-slate-200 focus:outline-none focus:border-primary-500 transition-all text-xs sm:text-sm">
-                            <option value="daily">Daily (~22 payments / month)</option>
-                            <option value="weekly">Weekly (4 payments / month)</option>
-                            <option value="bi-monthly">Bi-Monthly (2 payments / month)</option>
-                            <option value="monthly" selected>Monthly (1 payment / month)</option>
-                            <option value="quarterly">Quarterly (Every 3 months)</option>
+                            <option value="daily">Daily payments</option>
+                            <option value="weekly">Weekly payments</option>
+                            <option value="bi-monthly">Bi-Monthly /Every 15 days</option>
+                            <option value="monthly" selected>Monthly payments</option>
+                            <option value="quarterly">Quarterly /Every 3 months</option>
                         </select>
                     </div>
 
@@ -313,11 +313,11 @@
                     <div class="space-y-3.5 mb-2">
                         <div class="flex justify-between items-center py-2 border-b border-borderDark/60 text-xs sm:text-sm">
                             <span class="text-slate-400">Principal Amount</span>
-                            <span id="summary-principal" class="font-semibold text-white">₱50,000.00</span>
+                            <span id="summary-principal" class="font-semibold text-white">₱500.00</span>
                         </div>
                         <div class="flex justify-between items-center py-2 border-b border-borderDark/60 text-xs sm:text-sm">
                             <span class="text-slate-400">Total Interest</span>
-                            <span id="summary-interest" class="font-semibold text-emerald-400">₱9,000.00</span>
+                            <span id="summary-interest" class="font-semibold text-emerald-400">₱300.00</span>
                         </div>
                         <div class="flex justify-between items-center py-2 border-b border-borderDark/60 text-xs sm:text-sm">
                             <span class="text-slate-400">Total Processing Fee</span>
@@ -328,7 +328,7 @@
                                 <span id="summary-due-label" class="text-[11px] sm:text-xs font-bold text-slate-300 block">Equal Installment Due (w/ Fee)</span>
                                 <span id="summary-installments-count" class="text-[10px] text-slate-500">12 installments total</span>
                             </div>
-                            <span id="summary-monthly" class="text-base sm:text-lg font-extrabold text-primary-400">₱5,100.00</span>
+                            <span id="summary-monthly" class="text-base sm:text-lg font-extrabold text-primary-400">₱166.67</span>
                         </div>
                     </div>
                 </div>
@@ -817,7 +817,7 @@
 
     <!-- Footer -->
     <footer class="border-t border-borderDark bg-[#070b14] py-4 text-center text-[11px] text-slate-500">
-        <div class="max-w-7xl mx-auto px-4">&copy; 2026 Tyler's Farm Lending Coop. App developed by: dandarz&copy;2026</div>
+        <div class="max-w-7xl mx-auto px-4">&copy; 2026 Tyler's Farm Lending Coop. App developed by: dandarz &copy;2026</div>
     </footer>
 
     <!-- Firebase SDK & Script Logic -->
@@ -1294,53 +1294,9 @@
             }
         }
 
-        function renderAdminTable() {
-            const apps = getApplications();
-            const tbody = document.getElementById('admin-table-body');
-            document.getElementById('stat-total').textContent = apps.length;
-            document.getElementById('stat-pending').textContent = apps.filter(a => a.status === 'Pending').length;
-            document.getElementById('stat-approved').textContent = apps.filter(a => a.status === 'Approved').length;
-            document.getElementById('stat-portfolio').textContent = formatPeso(apps.filter(a => a.status === 'Approved').reduce((s, a) => s + a.principal, 0));
-
-            if (apps.length === 0) { tbody.innerHTML = ''; document.getElementById('admin-empty-state').classList.remove('hidden'); return; }
-            document.getElementById('admin-empty-state').classList.add('hidden');
-
-            let html = '';
-            apps.forEach(app => {
-                if(!app.paymentStatus) app.paymentStatus = 'Unpaid';
-                if(!app.dueDate) app.dueDate = 'N/A';
-
-                let actionBtn = app.status === 'Pending' 
-                    ? `<button onclick="promptApprove('${app.id}')" class="px-2 py-1 bg-emerald-600/20 text-emerald-400 rounded font-semibold mr-1 text-[11px]">Approve</button>`
-                    : `<span class="text-slate-500 italic text-[10px] mr-1">Approved</span>`;
-                actionBtn += `<button onclick="promptDelete('${app.id}')" class="px-2 py-1 bg-rose-500/20 text-rose-400 rounded font-semibold text-[11px]"><i class="fa-solid fa-trash-can"></i></button>`;
-                
-                let isPaid = app.paymentStatus === 'Paid';
-                let paymentToggleBtn = `
-                    <button onclick="promptTogglePayment('${app.id}')" class="px-2.5 py-1 rounded-full text-[10px] font-bold border flex items-center space-x-1 mx-auto ${isPaid ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-rose-500/10 text-rose-400 border-rose-500/30'}">
-                        <i class="fa-solid ${isPaid ? 'fa-circle-check' : 'fa-circle-xmark'}"></i>
-                        <span>${app.paymentStatus}</span>
-                    </button>
-                `;
-
-                html += `<tr class="hover:bg-slate-900/40">
-                    <td class="p-3.5 font-mono text-primary-400">${app.id}</td>
-                    <td class="p-3.5 font-bold text-white">${app.firstName} ${app.lastName}</td>
-                    <td class="p-3.5 text-slate-300 text-[11px]">${app.rateType}</td>
-                    <td class="p-3.5 font-semibold">${formatPeso(app.principal)}</td>
-                    <td class="p-3.5 font-semibold text-primary-400">${app.installmentDue}</td>
-                    <td class="p-3.5 text-amber-400 font-medium">${app.dueDate}</td>
-                    <td class="p-3.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${app.status === 'Approved' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}">${app.status}</span></td>
-                    <td class="p-3.5 text-center">${paymentToggleBtn}</td>
-                    <td class="p-3.5 text-right">${actionBtn}</td>
-                </tr>`;
-            });
-            tbody.innerHTML = html;
-        }
-
-        let pendingTargetAppId = null;
-        function promptApprove(id) {
-            pendingTargetAppId = id;
+        let approveTargetAppId = null;
+        function promptApproveLoan(id) {
+            approveTargetAppId = id;
             document.getElementById('approve-target-id').textContent = id;
             document.getElementById('approvePasswordInput').value = '';
             document.getElementById('approvePasswordError').classList.add('hidden');
@@ -1348,14 +1304,17 @@
             document.getElementById('approveConfirmModal').classList.add('flex');
         }
         function closeApproveModal() {
-            pendingTargetAppId = null;
+            approveTargetAppId = null;
             document.getElementById('approveConfirmModal').classList.remove('flex');
             document.getElementById('approveConfirmModal').classList.add('hidden');
         }
         function confirmApproveAction() {
             if (document.getElementById('approvePasswordInput').value === getAdminPassword()) {
-                if (pendingTargetAppId) {
-                    let apps = getApplications().map(a => { if(a.id === pendingTargetAppId) a.status = 'Approved'; return a; });
+                if (approveTargetAppId) {
+                    let apps = getApplications().map(a => {
+                        if (a.id === approveTargetAppId) a.status = 'Approved';
+                        return a;
+                    });
                     saveApplications(apps);
                     renderAdminTable();
                     closeApproveModal();
@@ -1366,7 +1325,7 @@
         }
 
         let deleteTargetAppId = null;
-        function promptDelete(id) {
+        function promptDeleteApplication(id) {
             deleteTargetAppId = id;
             document.getElementById('delete-target-id').textContent = id;
             document.getElementById('deletePasswordInput').value = '';
@@ -1392,36 +1351,137 @@
             }
         }
 
-        function openAdminAuth() { document.getElementById('adminAuthModal').classList.remove('hidden'); document.getElementById('adminAuthModal').classList.add('flex'); }
-        function closeAdminAuth() { document.getElementById('adminAuthModal').classList.add('hidden'); }
+        function renderAdminTable() {
+            const apps = getApplications();
+            const tbody = document.getElementById('admin-table-body');
+            const emptyState = document.getElementById('admin-empty-state');
+            
+            let totalCount = apps.length;
+            let pendingCount = apps.filter(a => a.status === 'Pending').length;
+            let approvedCount = apps.filter(a => a.status === 'Approved').length;
+            let portfolioSum = apps.filter(a => a.status === 'Approved').reduce((acc, curr) => acc + curr.principal, 0);
+
+            document.getElementById('stat-total').textContent = totalCount;
+            document.getElementById('stat-pending').textContent = pendingCount;
+            document.getElementById('stat-approved').textContent = approvedCount;
+            document.getElementById('stat-portfolio').textContent = formatPeso(portfolioSum);
+
+            if (totalCount === 0) {
+                tbody.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            emptyState.classList.add('hidden');
+
+            let html = '';
+            apps.forEach(a => {
+                const statusBadge = a.status === 'Approved' 
+                    ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Approved</span>`
+                    : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">Pending</span>`;
+                
+                const paymentBadge = a.paymentStatus === 'Paid'
+                    ? `<button onclick="promptTogglePayment('${a.id}')" class="px-2 py-1 rounded text-[10px] font-bold bg-emerald-600/20 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-600/30 transition-all" title="Click to toggle">Paid</button>`
+                    : `<button onclick="promptTogglePayment('${a.id}')" class="px-2 py-1 rounded text-[10px] font-bold bg-rose-600/20 text-rose-300 border border-rose-500/30 hover:bg-rose-600/30 transition-all" title="Click to toggle">Unpaid</button>`;
+
+                html += `
+                    <tr class="hover:bg-slate-900/40">
+                        <td class="p-3.5 font-mono font-bold text-primary-400">${a.id}</td>
+                        <td class="p-3.5 font-medium text-white">${a.firstName} ${a.lastName}</td>
+                        <td class="p-3.5 text-slate-400">${a.rateType}</td>
+                        <td class="p-3.5 font-semibold">${formatPeso(a.principal)}</td>
+                        <td class="p-3.5 text-primary-400 font-bold">${a.installmentDue}</td>
+                        <td class="p-3.5 text-amber-400">${a.dueDate}</td>
+                        <td class="p-3.5">${statusBadge}</td>
+                        <td class="p-3.5 text-center">${paymentBadge}</td>
+                        <td class="p-3.5 text-right space-x-1">
+                            ${a.status !== 'Approved' ? `<button onclick="promptApproveLoan('${a.id}')" class="px-2 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[11px] font-semibold">Approve</button>` : ''}
+                            <button onclick="promptDeleteApplication('${a.id}')" class="px-2 py-1 bg-rose-600 hover:bg-rose-500 text-white rounded text-[11px] font-semibold"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function openAdminAuth() {
+            document.getElementById('adminPasswordInput').value = '';
+            document.getElementById('adminAuthError').classList.add('hidden');
+            document.getElementById('adminAuthModal').classList.remove('hidden');
+            document.getElementById('adminAuthModal').classList.add('flex');
+        }
+        function closeAdminAuth() {
+            document.getElementById('adminAuthModal').classList.remove('flex');
+            document.getElementById('adminAuthModal').classList.add('hidden');
+        }
         function verifyAdminPassword() {
             if (document.getElementById('adminPasswordInput').value === getAdminPassword()) {
-                closeAdminAuth(); switchTab('admin');
-            } else { document.getElementById('adminAuthError').classList.remove('hidden'); }
+                closeAdminAuth();
+                switchTab('admin');
+            } else {
+                document.getElementById('adminAuthError').classList.remove('hidden');
+            }
         }
-        function lockAdminSession() { switchTab('calculator'); }
+        function lockAdminSession() {
+            switchTab('calculator');
+        }
 
+        /* Floating Calculator Logic */
         const calcContainer = document.getElementById('floating-calc-container');
-        const toggleBtn = document.getElementById('calc-toggle-btn');
-        const display = document.getElementById('calc-display');
+        const calcToggleBtn = document.getElementById('calc-toggle-btn');
+        const calcDisplay = document.getElementById('calc-display');
+        let calcValue = '0';
+        let calcResetNext = false;
 
-        toggleBtn.addEventListener('click', () => { calcContainer.classList.toggle('calc-minimized'); });
+        calcToggleBtn.addEventListener('click', () => {
+            calcContainer.classList.toggle('calc-minimized');
+        });
 
-        function calcAppend(val) {
-            if (display.value === '0' && val !== '.') { display.value = val; } else { display.value += val; }
+        function calcClear() {
+            calcValue = '0';
+            calcResetNext = false;
+            updateCalcDisplay();
         }
-        function calcClear() { display.value = '0'; }
-        function calcBack() { display.value = display.value.slice(0, -1) || '0'; }
+        function calcBack() {
+            if (calcValue.length > 1) {
+                calcValue = calcValue.slice(0, -1);
+            } else {
+                calcValue = '0';
+            }
+            updateCalcDisplay();
+        }
+        function calcAppend(char) {
+            if (calcResetNext && !isNaN(char)) {
+                calcValue = char;
+                calcResetNext = false;
+            } else {
+                if (calcValue === '0' && !isNaN(char)) {
+                    calcValue = char;
+                } else {
+                    calcValue += char;
+                }
+            }
+            updateCalcDisplay();
+        }
         function calcCompute() {
-            try { display.value = eval(display.value.replace(/[^0-9/*+\-.]/g, '')); } catch (e) { display.value = 'Error'; setTimeout(() => calcClear(), 1500); }
+            try {
+                let sanitized = calcValue.replace(/×/g, '*').replace(/÷/g, '/');
+                let result = eval(sanitized);
+                calcValue = String(result);
+                calcResetNext = true;
+                updateCalcDisplay();
+            } catch (e) {
+                calcValue = 'Error';
+                calcResetNext = true;
+                updateCalcDisplay();
+            }
+        }
+        function updateCalcDisplay() {
+            calcDisplay.value = calcValue;
         }
 
-        window.onload = function() {
-            const todayStr = new Date().toISOString().split('T')[0];
-            if(document.getElementById('dueDate')) { document.getElementById('dueDate').value = todayStr; }
-            calculateLoan(); 
-            updateAdminBadge(); 
-        };
+        // Initial calculation call on load
+        calculateLoan();
+        updateAdminBadge();
     </script>
 </body>
 </html>
